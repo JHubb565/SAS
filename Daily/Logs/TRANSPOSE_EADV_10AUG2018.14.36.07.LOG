@@ -1,0 +1,357 @@
+1                                           The SAS System               14:36 Friday, August 10, 2018
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M2) 
+      Licensed to ADVANCE AMERICA CASH ADVANCE CENTERS INC, Site 70136175.
+NOTE: This session is executing on the X64_SRV12  platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 13.2
+      SAS/ETS 13.2
+
+NOTE: Additional host information:
+
+ X64_SRV12 WIN 6.2.9200  Server
+
+NOTE: SAS initialization used:
+      real time           0.81 seconds
+      cpu time            0.34 seconds
+      
+1          %INCLUDE "\\CSSSASAPP\CADA\SAS SOURCE CODE\PRODUCTION\SERVICE ACCOUNTS\SVC_SASUSER.SAS";
+5          %INCLUDE "E:\SHARED\CADA\SAS SOURCE CODE\PRODUCTION\STDM\STDM_LIBRARY_SCRIPT.SAS";
+NOTE: Libref EADVRPT was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EAPROD1
+NOTE: Libref EADV was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EAPROD1
+NOTE: Libref EDW was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref QFUND1 was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref TXTITLE was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref TETL was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref OHCSO was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref ECA was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref ECA2 was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref CADA was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: BIOR
+NOTE: Libref SKYNET was successfully assigned as follows: 
+      Engine:        V9 
+2                                           The SAS System               14:36 Friday, August 10, 2018
+
+      Physical Name: E:\SHARED\CADA\SAS DATA\DATAMART\STDM
+NOTE: Libref TABLEAU was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: E:\SHARED\CADA\SAS DATA\DATAMART\TABLEAU
+NOTE: Libref FIRST was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: E:\SHARED\CADA\SAS DATA\DATAMART\CUSTOMERFIRSTLOAN
+NOTE: Libref DBADMIN was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EAPROD1
+NOTE: Libref EDW_ST was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref EDWQFUND was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EDWPRD
+NOTE: Libref SCDPEDW was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: PEDWPROD1
+NOTE: Libref PS was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: EPPROD1
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      176:49   
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+178        %INCLUDE "E:\SHARED\CADA\SAS SOURCE CODE\DEVELOPMENT\JHUBBARD\TOP SECRET PROGRAM.SAS";
+GOOD TO GO
+SVC_SASUser
+NOTE: Libref SKY was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: BIOR
+NOTE: Libref TMP_TBLS was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: BIOR
+212        
+213        /*UPDATE STATUS TABLE*/
+214        PROC SQL;
+215        CONNECT TO ORACLE (USER=&USER. PW=&PASSWORD. PATH='BIOR');
+216        	EXECUTE(UPDATE BIOR.DATAMART_STATUS
+217        			SET EADV_STATUS = 'UPLOADING'
+218        			   ,EADV_RUN_DATE = CURRENT_DATE
+219        			WHERE SOURCE = 'BIOR.TRANSPOSE_DAILY_SUMMARY'
+220        			)
+221        	 BY ORACLE;
+222        	 DISCONNECT FROM ORACLE;
+223        %RUNQUIT(&job,&sub30);
+           _
+           180
+WARNING: Apparent invocation of macro RUNQUIT not resolved.
+3                                           The SAS System               14:36 Friday, August 10, 2018
+
+WARNING: Apparent symbolic reference JOB not resolved.
+WARNING: Apparent symbolic reference SUB30 not resolved.
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+NOTE: PROC SQL set option NOEXEC and will continue to check the syntax of statements.
+224        
+225        /*INSERTS INTO STAGING TABLE*/
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.42 seconds
+      cpu time            0.03 seconds
+      
+
+
+226        PROC SQL;
+227        	CONNECT TO ORACLE(USER=&USER. PASSWORD=&PASSWORD. PATH='BIOR');
+228        	EXEC(INSERT INTO SKYNET.TRANSPOSE_DAILY_SUMMARY_EADV
+229        		            SELECT
+230                       PRODUCT ,PRODUCT_DESC ,POS ,INSTANCE ,BRANDCD ,BANKMODEL
+231                        ,COUNTRYCD ,STATE ,CITY ,ZIP ,ZONENBR ,ZONENAME ,REGIONNBR
+232                        ,REGIONRDO ,DIVISIONNBR ,DIVISIONDDO ,LOCNBR ,LOCATION_NAME
+233                        ,LOC_OPEN_DT ,LOC_CLOSE_DT ,BUSINESSDT ,LAST_REPORT_DT
+234                        ,LOC_LAST_REPORTED_DT ,LATITUDE ,LONGITUDE ,HOLIDAYNAME ,LASTTHURSDAY
+235                        ,THURSDAYWEEK
+236                      ,KPINAME
+237                      ,VALUE1
+238                    FROM
+239                    (
+240                    SELECT
+241                       PRODUCT ,PRODUCT_DESC ,POS ,INSTANCE ,BRANDCD ,BANKMODEL
+242                        ,COUNTRYCD ,STATE ,CITY ,ZIP ,ZONENBR ,ZONENAME ,REGIONNBR
+243                        ,REGIONRDO ,DIVISIONNBR ,DIVISIONDDO ,LOCNBR ,LOCATION_NAME
+244                        ,LOC_OPEN_DT ,LOC_CLOSE_DT ,BUSINESSDT ,LAST_REPORT_DT
+245                        ,LOC_LAST_REPORTED_DT ,LATITUDE ,LONGITUDE ,HOLIDAYNAME ,LASTTHURSDAY
+246                        ,THURSDAYWEEK
+247                      ,TOTADVRECV ,TOTADVFEERECV ,COMPLIANT_LOANS_OUTSTANDING
+248                        ,NEWCUSTCNTCOMPANY ,NET_REVENUE ,NEW_ORIGINATIONS
+249                        ,GROSS_REVENUE ,NET_WRITE_OFF ,WORAMTSUM ,TOTDEFAULTRECV
+250        				,REACTIVE_CUSTOMER_CNT
+251                    FROM SKYNET.DAILYSUM_DATAMART_EADV
+252                    GROUP BY
+253                        PRODUCT ,PRODUCT_DESC ,POS ,INSTANCE ,BRANDCD ,BANKMODEL
+254                        ,COUNTRYCD ,STATE ,CITY ,ZIP ,ZONENBR ,ZONENAME ,REGIONNBR
+255                        ,REGIONRDO ,DIVISIONNBR ,DIVISIONDDO ,LOCNBR ,LOCATION_NAME
+256                        ,LOC_OPEN_DT ,LOC_CLOSE_DT ,BUSINESSDT ,LAST_REPORT_DT
+257                        ,LOC_LAST_REPORTED_DT ,LATITUDE ,LONGITUDE ,HOLIDAYNAME ,LASTTHURSDAY
+258                        ,THURSDAYWEEK
+259                      ,TOTADVRECV ,TOTADVFEERECV ,COMPLIANT_LOANS_OUTSTANDING
+260                        ,NEWCUSTCNTCOMPANY ,NET_REVENUE ,NEW_ORIGINATIONS
+261                        ,GROSS_REVENUE ,NET_WRITE_OFF ,WORAMTSUM ,TOTDEFAULTRECV
+262        				,REACTIVE_CUSTOMER_CNT
+263                        )
+264                    UNPIVOT(
+265                        VALUE1
+4                                           The SAS System               14:36 Friday, August 10, 2018
+
+266                        FOR KPINAME
+267                        IN (
+268                        TOTADVRECV ,TOTADVFEERECV ,COMPLIANT_LOANS_OUTSTANDING
+269                        ,NEWCUSTCNTCOMPANY ,NET_REVENUE ,NEW_ORIGINATIONS
+270                        ,GROSS_REVENUE ,NET_WRITE_OFF ,WORAMTSUM ,TOTDEFAULTRECV
+271        				,REACTIVE_CUSTOMER_CNT                       ))) BY ORACLE;
+272        DISCONNECT FROM ORACLE;
+273        %RUNQUIT(&job,&sub30);
+           _
+           180
+WARNING: Apparent invocation of macro RUNQUIT not resolved.
+WARNING: Apparent symbolic reference JOB not resolved.
+WARNING: Apparent symbolic reference SUB30 not resolved.
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+NOTE: PROC SQL set option NOEXEC and will continue to check the syntax of statements.
+274        
+275        /*MERGE INTO PRODUCTION TABLE*/
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.43 seconds
+      cpu time            0.01 seconds
+      
+
+
+276        PROC SQL;
+277        	CONNECT TO ORACLE (USER=&USER. PASSWORD=&PASSWORD. PATH="BIOR");
+278        	EXECUTE (MERGE INTO BIOR.TRANSPOSE_DAILY_SUMMARY BIOR
+279            USING SKYNET.TRANSPOSE_DAILY_SUMMARY_EADV UPSERT
+280                ON (BIOR.INSTANCE=UPSERT.INSTANCE
+281        		    AND BIOR.PRODUCT_DESC=UPSERT.PRODUCT_DESC
+282        			AND BIOR.LOCNBR=UPSERT.LOCNBR
+283        			AND BIOR.BUSINESSDT = UPSERT.BUSINESSDT
+284        			AND BIOR.PRODUCT = UPSERT.PRODUCT
+285        			AND BIOR.KPINAME = UPSERT.KPINAME)
+286                WHEN MATCHED THEN UPDATE
+287                   SET
+288        				/*BIOR.PRODUCT=UPSERT.PRODUCT,*/
+289        				/*BIOR.PRODUCT_DESC=UPSERT.PRODUCT_DESC,*/
+290                        BIOR.POS=UPSERT.POS,
+291        				/*BIOR.INSTANCE=UPSERT.INSTANCE,*/
+292                        BIOR.BRANDCD=UPSERT.BRANDCD,
+293                        BIOR.BANKMODEL=UPSERT.BANKMODEL,
+294                        BIOR.COUNTRYCD=UPSERT.COUNTRYCD,
+295                        BIOR.STATE=UPSERT.STATE,
+296                        BIOR.CITY=UPSERT.CITY,
+297                        BIOR.ZIP=UPSERT.ZIP,
+298                        BIOR.ZONENBR=UPSERT.ZONENBR,
+299                        BIOR.ZONENAME=UPSERT.ZONENAME,
+300                        BIOR.REGIONNBR=UPSERT.REGIONNBR,
+301                        BIOR.REGIONRDO=UPSERT.REGIONRDO,
+302                        BIOR.DIVISIONNBR=UPSERT.DIVISIONNBR,
+303        				BIOR.DIVISIONDDO=UPSERT.DIVISIONDDO,
+304        				/*BIOR.LOCNBR=UPSERT.LOCNBR,*/
+5                                           The SAS System               14:36 Friday, August 10, 2018
+
+305                        BIOR.LOCATION_NAME=UPSERT.LOCATION_NAME,
+306                        BIOR.LOC_OPEN_DT=UPSERT.LOC_OPEN_DT,
+307                        BIOR.LOC_CLOSE_DT=UPSERT.LOC_CLOSE_DT,
+308        				/*BIOR.BUSINESSDT=UPSERT.BUSINESSDT,*/
+309                        BIOR.LAST_REPORT_DT=UPSERT.LAST_REPORT_DT,
+310                        BIOR.LOC_LAST_REPORTED_DT=UPSERT.LOC_LAST_REPORTED_DT,
+311                        BIOR.LATITUDE=UPSERT.LATITUDE,
+312        				BIOR.LONGITUDE=UPSERT.LONGITUDE,
+313                        BIOR.HOLIDAYNAME=UPSERT.HOLIDAYNAME,
+314                        BIOR.LASTTHURSDAY=UPSERT.LASTTHURSDAY,
+315                        BIOR.THURSDAYWEEK=UPSERT.THURSDAYWEEK,
+316        				/*BIOR.KPINAME = UPSERT.KPINAME,*/
+317        				BIOR.VALUE1 = UPSERT.VALUE1
+318                 WHEN NOT MATCHED
+319                    THEN INSERT
+320                         (PRODUCT,
+321        		          PRODUCT_DESC,
+322        		          POS,
+323        		          INSTANCE,
+324        		          BRANDCD,
+325        		          BANKMODEL,
+326        		          COUNTRYCD,
+327        		          STATE,
+328        		          CITY,
+329        		          ZIP,
+330        		          ZONENBR,
+331        		          ZONENAME,
+332        		          REGIONNBR,
+333        		          REGIONRDO,
+334        		          DIVISIONNBR,
+335        		          DIVISIONDDO,
+336        		          LOCNBR,
+337        		          LOCATION_NAME,
+338        		          LOC_OPEN_DT,
+339        		          LOC_CLOSE_DT,
+340        		          BUSINESSDT,
+341        		          LAST_REPORT_DT,
+342        		          LOC_LAST_REPORTED_DT,
+343        		          LATITUDE,
+344        		          LONGITUDE,
+345        		          HOLIDAYNAME,
+346        		          LASTTHURSDAY,
+347        		          THURSDAYWEEK,
+348        				  KPINAME,
+349        				  VALUE1)
+350                    VALUES
+351                         (UPSERT.PRODUCT,
+352        		          UPSERT.PRODUCT_DESC,
+353        		          UPSERT.POS,
+354        		          UPSERT.INSTANCE,
+355        		          UPSERT.BRANDCD,
+356        		          UPSERT.BANKMODEL,
+357        		          UPSERT.COUNTRYCD,
+358        		          UPSERT.STATE,
+6                                           The SAS System               14:36 Friday, August 10, 2018
+
+359        		          UPSERT.CITY,
+360        		          UPSERT.ZIP,
+361        		          UPSERT.ZONENBR,
+362        		          UPSERT.ZONENAME,
+363        		          UPSERT.REGIONNBR,
+364        		          UPSERT.REGIONRDO,
+365        		          UPSERT.DIVISIONNBR,
+366        		          UPSERT.DIVISIONDDO,
+367        		          UPSERT.LOCNBR,
+368        		          UPSERT.LOCATION_NAME,
+369        		          UPSERT.LOC_OPEN_DT,
+370        		          UPSERT.LOC_CLOSE_DT,
+371        		          UPSERT.BUSINESSDT,
+372        		          UPSERT.LAST_REPORT_DT,
+373        		          UPSERT.LOC_LAST_REPORTED_DT,
+374        		          UPSERT.LATITUDE,
+375        		          UPSERT.LONGITUDE,
+376        		          UPSERT.HOLIDAYNAME,
+377        		          UPSERT.LASTTHURSDAY,
+378        		          UPSERT.THURSDAYWEEK,
+379        		          UPSERT.KPINAME,
+380        				  UPSERT.VALUE1)
+381        	) BY ORACLE;
+382        	DISCONNECT FROM ORACLE;
+383        %RUNQUIT(&job,&sub30);
+           _
+           180
+WARNING: Apparent invocation of macro RUNQUIT not resolved.
+WARNING: Apparent symbolic reference JOB not resolved.
+WARNING: Apparent symbolic reference SUB30 not resolved.
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+NOTE: PROC SQL set option NOEXEC and will continue to check the syntax of statements.
+384        
+385        /*UPDATE STATUS TABLE*/
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.00 seconds
+      
+
+
+386        PROC SQL;
+387        CONNECT TO ORACLE (USER=&USER. PW=&PASSWORD. PATH='BIOR');
+388        	EXECUTE(UPDATE BIOR.DATAMART_STATUS
+389        			SET EADV_STATUS = 'FINISHED'
+390        			   ,EADV_COMPLETION_DATE = CURRENT_DATE
+391        			WHERE SOURCE = 'BIOR.TRANSPOSE_DAILY_SUMMARY'
+392        			)
+393        	 BY ORACLE;
+394        	 DISCONNECT FROM ORACLE;
+395        %RUNQUIT(&job,&sub30);
+           _
+           180
+7                                           The SAS System               14:36 Friday, August 10, 2018
+
+WARNING: Apparent invocation of macro RUNQUIT not resolved.
+WARNING: Apparent symbolic reference JOB not resolved.
+WARNING: Apparent symbolic reference SUB30 not resolved.
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+NOTE: PROC SQL set option NOEXEC and will continue to check the syntax of statements.
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.03 seconds
+      
+
+ERROR: Errors printed on pages 2,3,4,6,7.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.23 seconds
+      cpu time            0.92 seconds
+      
